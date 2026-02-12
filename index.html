@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pragmatic Quest: Shadow Council</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#d4af37;--gold-dim:rgba(212,175,55,.3);--dark:#0d1117;--card:rgba(30,25,40,.95);--card2:rgba(20,18,30,.95);--text:#e6d5b8;--dim:#a09080;--green:#5cb85c;--red:#d9534f;--orange:#e67e22;--blue:#4a90d9;--purple:#9b59b6;--yellow:#f0c040;--teal:#2ec4b6}
+body{min-height:100vh;background:linear-gradient(170deg,#0a0e14,#0d1117 25%,#1a1025 55%,#0f0a18);font-family:'Nunito',sans-serif;color:var(--text);overflow-x:hidden}
+.star-field{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:rgba(255,215,0,.4);animation:twinkle var(--dur) ease-in-out var(--delay) infinite alternate}
+@keyframes twinkle{from{opacity:.1}to{opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 12px rgba(212,175,55,.15)}50%{box-shadow:0 0 30px rgba(212,175,55,.4)}}
+@keyframes pulseBoss{0%,100%{box-shadow:0 0 10px rgba(217,83,79,.2)}50%{box-shadow:0 0 28px rgba(217,83,79,.5)}}
+@keyframes moveToken{from{transform:scale(1.3)}to{transform:scale(1)}}
+.container{max-width:960px;margin:0 auto;padding:18px 16px 40px;position:relative;z-index:1}
+.container.wide{max-width:1100px}
+.card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--gold-dim);border-radius:16px;padding:22px;margin-bottom:14px;box-shadow:0 6px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(212,175,55,.08);animation:fadeIn .4s ease}
+.card.glow{animation:fadeIn .4s ease,pulseGold 3s ease-in-out infinite}
+h1.title{font-family:'Cinzel',serif;font-size:30px;font-weight:700;color:var(--gold);text-align:center;text-shadow:0 0 20px rgba(212,175,55,.2);letter-spacing:2px}
+h2.section{font-family:'Cinzel',serif;color:var(--gold);font-size:16px;margin-bottom:12px}
+h3.quest-title{font-family:'Cinzel',serif;color:var(--gold);font-size:20px;margin-bottom:10px}
+.sub{font-size:13px;color:var(--dim);text-align:center;margin-bottom:20px}
+label{font-size:12px;color:var(--dim);display:block;margin-bottom:5px;font-weight:600}
+input[type="text"]{width:100%;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid var(--gold-dim);border-radius:10px;color:var(--text);font-size:15px;font-family:'Nunito',sans-serif;outline:none}
+input:focus{border-color:var(--gold)}
+.btn{background:linear-gradient(135deg,var(--gold),#c9a030);color:var(--dark);border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(212,175,55,.3)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn-sm{padding:9px 16px;font-size:13px;width:auto}
+.btn-green{background:linear-gradient(135deg,var(--green),#4a9e4a)}
+.btn-orange{background:linear-gradient(135deg,var(--orange),#d35400)}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#8e44ad)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#3a7bc8)}
+.btn-red{background:linear-gradient(135deg,var(--red),#c0392b)}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold-dim);border-radius:10px;padding:9px 16px;font-size:13px;font-family:'Nunito',sans-serif;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-outline:hover{background:rgba(212,175,55,.06)}
+.flex{display:flex;align-items:center}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}.wrap{flex-wrap:wrap}.grow{flex:1;min-width:0}.center{text-align:center}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}.mt-24{margin-top:24px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.hidden{display:none!important}
+.mode-card{background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 22px;cursor:pointer;text-align:center;transition:all .25s;flex:1;min-width:190px}
+.mode-card:hover{background:rgba(255,255,255,.05);border-color:var(--gold-dim);transform:translateY(-3px)}
+.mode-card .icon{font-size:40px;margin-bottom:8px}.mode-card .name{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);font-weight:700;margin-bottom:5px}.mode-card .desc{font-size:11px;color:var(--dim);line-height:1.5}
+.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.class-card{background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;cursor:pointer;text-align:center;transition:all .2s}
+.class-card:hover{background:rgba(255,255,255,.05)}.class-card.sel{border-width:2px}
+.class-card .emoji{font-size:24px}.class-card .cname{font-weight:700;font-size:12px;margin-top:3px}.class-card .cdesc{color:var(--dim);font-size:10px;margin-top:2px}
+.xp-track{background:rgba(255,255,255,.06);border-radius:20px;height:11px;overflow:hidden}
+.xp-fill{height:100%;border-radius:20px;transition:width .8s ease}
+.party-member{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;flex:1;min-width:160px}
+/* MAP */
+.map-wrap{position:relative;width:100%;padding-top:62%;background:linear-gradient(135deg,rgba(15,10,25,.9),rgba(20,15,30,.9));border-radius:14px;border:1px solid var(--gold-dim);overflow:hidden}
+.map-inner{position:absolute;inset:0}
+.map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map-node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:5;transition:all .3s}
+.map-node.locked{opacity:.3;cursor:default;filter:grayscale(1)}
+.node-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:2px solid rgba(255,255,255,.2);transition:all .3s}
+.node-dot.quest-dot{background:rgba(212,175,55,.15);border-color:var(--gold-dim)}
+.node-dot.boss-dot{background:rgba(217,83,79,.15);border-color:rgba(217,83,79,.4);width:40px;height:40px;font-size:18px;animation:pulseBoss 2.5s ease-in-out infinite}
+.node-dot.done{background:rgba(92,184,92,.2);border-color:var(--green)}
+.node-dot.current{background:rgba(212,175,55,.3);border-color:var(--gold);box-shadow:0 0 18px rgba(212,175,55,.4)}
+.map-node.locked .node-dot{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1)}
+.map-node.locked .boss-dot{animation:none}
+.node-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:700;color:var(--dim);margin-top:3px;text-align:center;pointer-events:none}
+.node-label.current-label{color:var(--gold)}
+.party-token{position:absolute;transform:translate(-50%,-50%);z-index:10;transition:left .8s ease,top .8s ease;pointer-events:none;display:flex;gap:1px;background:rgba(0,0,0,.6);border-radius:8px;padding:3px 5px;border:1px solid var(--gold);font-size:12px}
+.party-token.arrived{animation:moveToken .4s ease}
+.region-label{position:absolute;font-family:'Cinzel',serif;font-size:11px;color:rgba(255,255,255,.12);font-weight:700;letter-spacing:2px;pointer-events:none;text-transform:uppercase}
+.dm-story{font-size:18px;line-height:1.75;color:#c4b49a;text-align:center;font-family:'Cinzel',serif}
+.dm-scenario{font-size:16px;line-height:1.7;font-style:italic;text-align:center;color:var(--text)}
+.dm-choice-display{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 16px;margin-bottom:9px;font-size:14px;line-height:1.5}
+.dm-choice-display .letter{color:var(--gold);font-weight:800;margin-right:8px;font-size:16px}
+.dm-choice-display.best-reveal{border-color:var(--green);background:rgba(92,184,92,.08)}
+.dm-choice-display.partial-reveal{border-color:var(--yellow);background:rgba(240,192,64,.08)}
+.dm-choice-display.wrong-reveal{border-color:rgba(255,255,255,.04);opacity:.4}
+.answer-btn{border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 14px;background:rgba(255,255,255,.03);color:var(--text);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;min-width:40px;text-align:center}
+.answer-btn:hover{background:rgba(255,255,255,.06)}
+.answer-btn.best-mark{background:rgba(92,184,92,.2);border-color:var(--green);color:var(--green)}
+.answer-btn.partial-mark{background:rgba(240,192,64,.2);border-color:var(--yellow);color:var(--yellow)}
+.answer-btn.wrong-mark{background:rgba(217,83,79,.2);border-color:var(--red);color:var(--red)}
+.choice-btn{display:block;width:100%;background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 16px;margin-bottom:9px;cursor:pointer;text-align:left;color:var(--text);font-size:13px;line-height:1.55;font-family:'Nunito',sans-serif;transition:all .2s}
+.choice-btn:hover:not(:disabled){background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
+.choice-btn:disabled{cursor:default}
+.choice-btn .letter{color:var(--gold);font-weight:800;margin-right:8px}
+.choice-btn.best{border-color:var(--green);background:rgba(92,184,92,.08)}
+.choice-btn.partial{border-color:var(--yellow);background:rgba(240,192,64,.08)}
+.choice-btn.wrong{border-color:var(--red);background:rgba(217,83,79,.08)}
+.choice-btn.show-best{border-color:rgba(92,184,92,.3);background:rgba(92,184,92,.04)}
+.choice-btn.show-partial{border-color:rgba(240,192,64,.2);background:rgba(240,192,64,.03)}
+.badge{display:inline-block;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);border-radius:20px;padding:2px 11px;font-size:10px;color:var(--gold);font-weight:600}
+.badge-coop{display:inline-block;background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.2);border-radius:20px;padding:2px 11px;font-size:10px;color:var(--blue);font-weight:600}
+.badge-gray{display:inline-block;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:20px;padding:2px 11px;font-size:10px;color:var(--purple);font-weight:600}
+.gray-note{background:linear-gradient(135deg,rgba(155,89,182,.06),rgba(155,89,182,.02));border:1px solid rgba(155,89,182,.18);border-radius:10px;padding:12px;margin-top:10px;font-size:12px;line-height:1.6;color:#c4b49a}
+.coop-box{background:linear-gradient(135deg,rgba(74,144,217,.06),rgba(74,144,217,.02));border:1px solid rgba(74,144,217,.18);border-radius:12px;padding:14px;margin-top:10px}
+.stat-box{flex:1;min-width:65px;background:rgba(255,255,255,.03);border-radius:10px;padding:7px 8px;text-align:center}
+.stat-box .num{font-size:17px;font-weight:800}.stat-box .lbl{font-size:9px;color:var(--dim)}
+.feedback{animation:slideUp .4s ease}
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s ease}
+.overlay-content{text-align:center;animation:popIn .5s ease;max-width:500px;padding:20px}
+.big-reveal{font-family:'Cinzel',serif;font-size:24px;color:var(--green);font-weight:700;text-align:center;padding:20px;animation:popIn .5s ease}
+.reset-btn{background:transparent;color:#444;border:1px solid #222;border-radius:10px;padding:7px 14px;font-size:10px;font-family:'Nunito',sans-serif;cursor:pointer}
+.boss-hp{background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.3);border-radius:20px;height:16px;overflow:hidden;margin:10px 0}
+.boss-hp-fill{height:100%;background:linear-gradient(90deg,var(--red),#e74c3c);border-radius:20px;transition:width .6s ease}
+.round-indicator{display:inline-block;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.2);text-align:center;line-height:18px;font-size:10px;font-weight:800;margin:0 3px}
+.round-indicator.won{background:rgba(92,184,92,.3);border-color:var(--green);color:var(--green)}
+.round-indicator.lost{background:rgba(217,83,79,.3);border-color:var(--red);color:var(--red)}
+.round-indicator.current{border-color:var(--gold);color:var(--gold)}
+@media(max-width:600px){h1.title{font-size:22px}.card{padding:16px}.dm-story{font-size:15px}.dm-scenario{font-size:14px}.node-dot{width:26px;height:26px;font-size:11px}.node-dot.boss-dot{width:34px;height:34px;font-size:15px}.node-label{font-size:8px}}
+</style>
+</head>
+<body>
+<div class="star-field" id="starField"></div>
+<div class="container" id="app"></div>
+<div class="overlay hidden" id="overlay"><div class="overlay-content" id="overlayContent"></div></div>
+<script>
+const CL=[{name:"Strategist",emoji:"🗡️",desc:"Reads the room, navigates dynamics",color:"#4a90d9"},{name:"Sentinel",emoji:"🛡️",desc:"Stands up for others, holds boundaries",color:"#5cb85c"},{name:"Oracle",emoji:"🔮",desc:"Sees every angle",color:"#9b59b6"},{name:"Trickster",emoji:"⚡",desc:"Creative solutions to social tangles",color:"#e67e22"}];
+
+const REGIONS=[
+  {name:"The Outer Ward",color:"#4a90d9",desc:"Where you learn to read the battlefield"},
+  {name:"The Market Quarter",color:"#5cb85c",desc:"Where perspectives collide"},
+  {name:"The Inner Sanctum",color:"#e67e22",desc:"Where boundaries are tested"},
+  {name:"The Dark Archive",color:"#9b59b6",desc:"Where you find your voice"},
+  {name:"The Shadow Throne",color:"#d9534f",desc:"Where everything is at stake"}
+];
+
+// MAP: 25 nodes (5 regions x [4 quests + 1 boss]), linear path snaking L-R then R-L
+const MAP=[
+  {x:8,y:11,type:"quest",region:0},{x:24,y:11,type:"quest",region:0},{x:40,y:14,type:"quest",region:0},{x:56,y:11,type:"quest",region:0},{x:74,y:13,type:"boss",region:0},
+  {x:74,y:31,type:"quest",region:1},{x:58,y:28,type:"quest",region:1},{x:42,y:31,type:"quest",region:1},{x:26,y:28,type:"quest",region:1},{x:8,y:30,type:"boss",region:1},
+  {x:8,y:49,type:"quest",region:2},{x:24,y:46,type:"quest",region:2},{x:40,y:49,type:"quest",region:2},{x:56,y:46,type:"quest",region:2},{x:74,y:48,type:"boss",region:2},
+  {x:74,y:67,type:"quest",region:3},{x:58,y:64,type:"quest",region:3},{x:42,y:67,type:"quest",region:3},{x:26,y:64,type:"quest",region:3},{x:8,y:66,type:"boss",region:3},
+  {x:8,y:85,type:"quest",region:4},{x:24,y:82,type:"quest",region:4},{x:40,y:85,type:"quest",region:4},{x:56,y:82,type:"quest",region:4},{x:74,y:84,type:"boss",region:4}
+];
+
+const QUESTS=[
+// R1: Reading the Room + Navigating Conflict
+{id:"q1",skill:"Reading the Room",type:"standard",title:"The Tension at the Table",
+story:"Your guild is eating at the tavern after a tough mission. Two members — Kai and Jess — aren't speaking. Everyone else is making forced small talk.",
+scenario:"You don't know what happened. Kai is eating silently with a clenched jaw. Jess keeps glancing at Kai then looking away. The group is uncomfortable. What do you do?",
+choices:[
+  {text:"Change the energy by bringing up the next mission — take pressure off the tension without ignoring it. Check in with Kai and Jess separately later.",rating:"best",xp:20,feedback:"You read the room: a group dinner isn't the time to force a confrontation. Shifting group energy while planning private follow-up shows you respect both comfort AND privacy. Not every problem needs a public solution."},
+  {text:"Say, 'Okay, what's going on with you two? The vibe is weird and everyone can tell.' Get it in the open.",rating:"partial",xp:10,feedback:"Direct and brave — you named the elephant in the room. But putting two people on the spot publicly can backfire. They might not be ready, or the issue might be too personal for a group setting."},
+  {text:"Text Jess under the table: 'u ok? what happened w kai?'",rating:"partial",xp:10,feedback:"Private check-in — good instinct. But texting under the table while everyone's together feels secretive and could make Kai suspicious. The method is right, the timing is off."},
+],discussion:"When there's obvious tension, is it better to address it directly or redirect? Does the answer change based on public vs. private?"},
+
+{id:"q2",skill:"Reading the Room",type:"gray",title:"The Misread Signal",
+story:"Your teammate Devon pitched an idea at a guild meeting. The guild leader Mara says 'That's... interesting' with a pause and flat expression.",
+scenario:"Devon takes it as a compliment and starts making detailed plans. You noticed the pause and flat tone — you're pretty sure Mara wasn't impressed. What do you do?",
+choices:[
+  {text:"Pull Devon aside after: 'Hey, I might be wrong, but I'm not sure Mara was totally on board. Maybe check in with her before going all-in.'",rating:"best",xp:20,feedback:"You protected Devon without undermining them publicly. Hedging with 'I might be wrong' is important — you're interpreting a signal and could be wrong. That humility matters."},
+  {text:"Say nothing. Maybe you're wrong. It's not your place to interpret other people's feelings for Devon.",rating:"best",xp:20,feedback:"Legitimate choice. You can't be 100% sure what Mara meant. Sometimes the best read of the room is knowing you could be wrong and choosing not to act on uncertain info."},
+  {text:"Ask in the meeting: 'Mara, do you actually think this could work? I want us all on the same page.'",rating:"partial",xp:10,feedback:"Forces clarity, but might embarrass Mara (who was polite for a reason) and make Devon feel undermined in front of everyone."},
+],grayNote:"A and B represent two real philosophies: 'help a friend avoid a mistake' vs. 'don't assume you can read minds.' Both require different kinds of social courage.",discussion:"How do you decide when to trust your read of someone's tone vs. accepting you might be wrong?"},
+
+{id:"q3",skill:"Navigating Conflict",type:"standard",title:"The Credit Thief",
+story:"You and Riley worked together on a quest strategy — your core plan, Riley's refinements. At the guild meeting, Riley presents it as 'my strategy' without mentioning you.",
+scenario:"Riley is getting all the praise. You're watching it happen. Riley catches your eye and looks away. You're angry. What do you do RIGHT NOW?",
+choices:[
+  {text:"Don't make a scene. After the meeting, tell Riley directly: 'Hey, that was a team effort. It bothered me that you presented it as yours. What happened?'",rating:"best",xp:20,feedback:"You managed anger without stuffing it down OR blowing up. Private confrontation gives Riley a chance to explain — maybe they got nervous and forgot. Starting with 'what happened?' leaves room for conversation instead of accusation."},
+  {text:"Speak up casually in the meeting: 'Yeah, Riley and I spent a lot of time developing that together — glad the guild likes where we landed.'",rating:"best",xp:20,feedback:"Smooth. You claimed credit without accusing anyone. The 'we' and 'together' do the work without creating confrontation. Riley gets the message. Nobody loses face. Real social finesse."},
+  {text:"Let it go. It's not worth the drama — people will figure out eventually who does the work.",rating:"partial",xp:8,feedback:"The avoidance instinct is understandable. But 'people will figure it out eventually' often isn't true. Repeatedly letting someone take credit builds resentment that eventually explodes."},
+],discussion:"When does 'picking your battles' become 'letting people walk over you'?"},
+
+{id:"q4",skill:"Navigating Conflict",type:"coop",title:"The Group Project Meltdown",
+story:"Critical quest, four roles, deadline tomorrow. Alex hasn't done their part. Says they've 'been dealing with stuff' but won't say what.",
+scenario:"Morgan is furious: 'This is unacceptable.' Sam says: 'Maybe we should just cover Alex's part.' Alex is staring at the table, shutting down. Lead this conversation.",
+choices:[
+  {text:"'Morgan, I hear you — this affects all of us. Alex, can you do ANY part tonight? Whatever you can't, we split among us. After the deadline, we talk about preventing this.'",rating:"best",xp:20,feedback:"You validated Morgan, gave Alex a manageable ask (not all-or-nothing), distributed remaining work, and flagged a future conversation. Managing a crisis without creating a bigger one."},
+  {text:"'Alex, you need to tell us what's going on. We can't help if we don't know.'",rating:"partial",xp:10,feedback:"Good instinct, but pressuring personal details in front of a frustrated group feels like interrogation. Alex said they're 'dealing with stuff' — that might be all they can share now."},
+  {text:"Side with Sam — just split Alex's work and move on. Getting it done matters more than blame.",rating:"partial",xp:10,feedback:"Pragmatic, but sets a precedent: no consequences, no conversation. Morgan's frustration is valid and needs acknowledging."},
+],coopNote:"🤝 Assign roles — Morgan (angry), Alex (shutting down), Sam (peacekeeper), leader. Act it out in under 2 minutes.",discussion:"What's the difference between holding someone accountable and attacking them?"},
+
+// R2: Perspective-Taking + Adapting Communication
+{id:"q5",skill:"Perspective-Taking",type:"gray",title:"The Outsider",
+story:"Zara transferred from a rival guild. Different customs, different communication style, keeps to herself.",
+scenario:"Marcus says: 'She's standoffish. Gave me one-word answers twice.' You've noticed Zara laughs at group jokes and always shows up early. What do you say?",
+choices:[
+  {text:"'I've noticed she laughs at our jokes and shows up early — I think she DOES want to be here. Maybe her style is just different. What if we try a smaller setting?'",rating:"best",xp:20,feedback:"You challenged Marcus with EVIDENCE and offered a solution. Noticing arrival time and laughter is observational gold — signals of wanting to belong even without words."},
+  {text:"'Some people take longer to warm up. Just give her space.'",rating:"partial",xp:10,feedback:"Kind and possibly true. But 'give her space' can become 'ignore her' if nobody actively creates connection opportunities."},
+  {text:"'Try one-on-one instead of the group. Ask about her old guild — people like talking about what they know.'",rating:"best",xp:20,feedback:"Concrete, actionable. Group dynamics differ from one-on-one. Asking about her expertise gives her a topic where she's the expert — empowering for someone new."},
+],grayNote:"A reframes assumptions with evidence. C gives specific strategy. Together they'd be even better — but you usually pick one approach.",discussion:"Think about a time you were new somewhere. What made you feel included vs. more like an outsider?"},
+
+{id:"q6",skill:"Perspective-Taking",type:"coop",title:"The Expelled Member",
+story:"Guild voted to remove Leo for missing quests. Leo posted: 'Fine. None of you ever liked me anyway. This guild is a joke.'",
+scenario:"You learn Leo's home life is unstable and the guild was their anchor. Leo doesn't know you know this. How does your group respond?",
+choices:[
+  {text:"Private message Leo: 'The vote was about attendance, not liking you. If your situation changes, the door isn't permanently closed.' Don't respond publicly.",rating:"best",xp:20,feedback:"Separated public drama from private truth. The message addresses Leo's real fear without revealing what you know about their situation. That's their story to tell."},
+  {text:"Respond in the group chat: 'We made this decision because of attendance. It's not personal. We wish you well.'",rating:"partial",xp:10,feedback:"Professional but potentially cold. A public, measured response to an emotional message might feel dismissive. The group chat isn't where Leo's real feelings get addressed."},
+  {text:"Tell the group about Leo's home situation so they understand the reaction.",rating:"wrong",xp:0,feedback:"Hard no. That information was shared in confidence. You can advocate for compassion without revealing reasons: 'Let's be gentle — we don't know what people are going through.'"},
+],coopNote:"🤝 Draft the private message to Leo together. It must be honest, compassionate, and not reveal you know about their home situation. Read it aloud.",discussion:"How do you use understanding about someone's private situation without betraying their trust?"},
+
+{id:"q7",skill:"Adapting Communication",type:"standard",title:"The Two Versions",
+story:"You saw teammate Rico cut a dangerous corner during a quest. Nobody got hurt, but it was reckless. You need to tell the guild leader.",
+scenario:"How do you bring this up to the GUILD LEADER?",
+choices:[
+  {text:"'I wanted to flag something from the last quest. Rico took a shortcut past the safety protocol. Nobody got hurt, but I'm concerned about it happening again. Wanted you to know so we can address it as a team.'",rating:"best",xp:20,feedback:"Factual, specific, non-dramatic, solution-oriented. You described without editorializing, acknowledged no harm (fairness to Rico), and framed it as a team issue."},
+  {text:"'Hey, I don't want to be that person, but Rico did something sketchy and someone's gonna get hurt eventually.'",rating:"partial",xp:10,feedback:"Valid concern, but 'sketchy' is vague for a formal conversation. 'I don't want to be that person' undermines your own message before you even make it."},
+  {text:"'Rico was reckless and almost got people killed. You need to deal with this.'",rating:"wrong",xp:0,feedback:"'Almost got people killed' is exaggeration. 'Reckless' is judgment, not description. This is a personal attack disguised as a safety concern."},
+],discussion:"Now describe the SAME situation to your best friend. How do the words, tone, and energy change?"},
+
+{id:"q8",skill:"Adapting Communication",type:"standard",title:"The Email to the Elder",
+story:"You need to request time off from guild duties for a family obligation. The guild elder is formal. The request will be read by leadership.",
+scenario:"Which version is strongest?",
+choices:[
+  {text:"'Hey! Family thing next weekend, can't make the quest. Sorry!! Can someone cover? Thanks!'",rating:"wrong",xp:0,feedback:"Too casual for leadership. No dates, no coverage plan. Exclamation points undermine professionalism. This is a text to a friend, not a request to authority."},
+  {text:"'Dear Elder, I'm requesting leave on [date] for a family commitment. I've arranged for [teammate] to cover my duties. I'll return on [date]. Thank you.'",rating:"best",xp:20,feedback:"Specific dates, coverage arranged (showing responsibility), professional but not robotic. Shows you thought it through before asking."},
+  {text:"'I won't be available on [date]. Let me know if that's a problem.'",rating:"partial",xp:10,feedback:"Brief but 'let me know if that's a problem' puts the burden on them and sounds confrontational. No coverage arranged either."},
+],discussion:"Is code-switching 'being fake' or a social skill? Defend your position."},
+
+// R3: Setting Boundaries + Conversation Skills
+{id:"q9",skill:"Setting Boundaries",type:"gray",title:"The Favor Chain",
+story:"Taylor asks for help with quest assignments every week. It's cutting into your own prep time. They text again: 'Can you help with tomorrow's report?'",
+scenario:"You're behind on your own work. How do you respond?",
+choices:[
+  {text:"'I'm behind on my own stuff this week. What if we study together Thursday? I can show you how to approach it rather than doing it for you.'",rating:"best",xp:20,feedback:"Said no to the ask without rejecting the friendship. Offered an alternative that builds independence. 'Show you how' is different from 'do it for you.'"},
+  {text:"'Sure, send it over.' Sigh internally and stay up late again.",rating:"wrong",xp:0,feedback:"This isn't kindness — it's avoidance. Every yes-when-you-mean-no builds resentment. A boundary now prevents a blowup later."},
+  {text:"'Honestly Taylor, I can't keep doing this every week. Figure it out yourself.'",rating:"partial",xp:10,feedback:"The boundary is needed. But compare 'figure it out yourself' with 'I want to help you learn to do this on your own' — same message, very different impact."},
+],grayNote:"The partial answer is honest. The best answer is honest AND kind. The difference matters.",discussion:"What's the difference between being a good friend and being a pushover?"},
+
+{id:"q10",skill:"Setting Boundaries",type:"standard",title:"The Group Chat Pressure",
+story:"Guild group chat is roasting someone from a rival guild — sharing embarrassing screenshots, making fun of them.",
+scenario:"Someone tags you: 'lol add something, this is gold.' Everyone seems into it. What do you do?",
+choices:[
+  {text:"Don't add to it. Redirect: 'lol I'm good. hey did anyone see the new quest board? some look insane.' Give the group an exit ramp.",rating:"best",xp:20,feedback:"You didn't participate, didn't lecture, and changed the energy. Not adding fuel IS boundary-setting. The redirect gives the group an off-ramp from behavior they might regret."},
+  {text:"'Yo this is kind of messed up. How would you feel if someone did this to you?'",rating:"partial",xp:12,feedback:"Brave and principled. But in a hyped group chat, being the morality police can backfire — people double down. A DM to the person who started it might be more effective."},
+  {text:"Leave the chat or don't respond.",rating:"partial",xp:10,feedback:"Not participating is valid. But silence when you're tagged can be read many ways. Make sure your silence isn't interpreted as approval."},
+],discussion:"What's the social cost of speaking up vs. staying silent? Is redirecting courage or avoidance?"},
+
+{id:"q11",skill:"Conversation Skills",type:"standard",title:"The Awkward Introduction",
+story:"Guild mixer. You know nobody. Someone standing alone looks equally uncomfortable. You make eye contact — they give a small, uncertain smile.",
+scenario:"You walk over. What's your opener, and how do you handle short answers?",
+choices:[
+  {text:"'Hey, I don't know anyone here either. I'm [name]. Been in this guild long?' If they give a short answer, build on it: 'Not really' → 'Oh, new too? How'd you hear about it?'",rating:"best",xp:20,feedback:"Leading with shared vulnerability creates instant connection. You gave your name, asked open-ended, and showed the instinct to build on whatever they give you. Good conversationalists don't need long answers."},
+  {text:"'Hi! I'm [name]. What do you do? What's your specialty? Where are you from originally?'",rating:"partial",xp:8,feedback:"Friendly but three questions at once feels like rapid fire. One at a time. Let them breathe. Let conversation find its rhythm."},
+  {text:"Stand near them and wait for them to start. You don't want to be awkward.",rating:"wrong",xp:0,feedback:"Now you're both waiting. Someone has to go first. The discomfort of approaching is brief; standing alone all night is much longer."},
+],discussion:"What makes conversation feel like an interview vs. a real connection?"},
+
+{id:"q12",skill:"Conversation Skills",type:"gray",title:"The Oversharer",
+story:"New guild member Parker has been talking for 10 minutes straight, sharing increasingly personal details about family problems. People nearby are glancing over.",
+scenario:"Parker is clearly lonely. But you're uncomfortable and they're not reading the room. What do you do?",
+choices:[
+  {text:"Redirect gently: 'That sounds really intense, Parker. Hey, have you met [someone nearby]? Let me introduce you.' Widen the circle to shift the depth.",rating:"best",xp:20,feedback:"Validated Parker, didn't shame them, and used a social maneuver (introducing someone new) to reset conversation depth naturally."},
+  {text:"Be direct: 'Parker, I can tell you're going through a lot. But this might not be the best setting — could we talk more privately sometime?'",rating:"best",xp:20,feedback:"Honest and compassionate. You explained WHY you're redirecting, offered to continue privately. Treats Parker as an adult who can handle gentle correction."},
+  {text:"Keep listening. They clearly need someone and it'd be mean to cut them off.",rating:"partial",xp:8,feedback:"Your empathy is genuine. But oversharing publicly isn't always in THEIR best interest either — they might regret it later. Your comfort matters too."},
+],grayNote:"A redirects without a direct conversation. B has the direct conversation. Which respects Parker more?",discussion:"When someone is oversharing, who are you protecting by redirecting — them or yourself?"},
+
+// R4: Self-Advocacy + Digital Communication
+{id:"q13",skill:"Self-Advocacy",type:"standard",title:"The Unfair Assignment",
+story:"Guild leader assigns quest roles. You get scouting — again. Fourth time in a row. Others rotate through different roles.",
+scenario:"Assignment is posted. Others chat excitedly about new roles. You're frustrated. What do you do?",
+choices:[
+  {text:"Complain to friends and hope word gets back to the leader.",rating:"wrong",xp:0,feedback:"Venting accomplishes nothing constructive. Worse, it might reach the leader as gossip instead of professional concern. If you have a problem with leadership, go to leadership."},
+  {text:"Request a private meeting: 'I've been on scouting four weeks running. I'd like the chance to develop other skills. Could I rotate into [specific role] next time?'",rating:"best",xp:20,feedback:"Direct, respectful, specific. You stated the pattern factually, didn't accuse unfairness, and asked for something concrete. Framing it as growth shows initiative."},
+  {text:"Just do scouting again. Not worth making waves.",rating:"partial",xp:8,feedback:"Four times is a pattern, and silence means it continues. Self-advocacy isn't 'making waves' — it's communicating your needs."},
+],discussion:"Why is self-advocacy harder than advocating for a friend? Say the best answer out loud."},
+
+{id:"q14",skill:"Self-Advocacy",type:"standard",title:"The Misunderstood Joke",
+story:"During a meeting, someone jokes: 'Classic [you], always taking forever to get to the point!' People laugh.",
+scenario:"It stings. You know you sometimes take longer to organize thoughts. They probably didn't mean harm, but it hurt. Meeting moves on. Do you say something?",
+choices:[
+  {text:"After the meeting: 'Hey, that comment about me taking forever actually bothered me. I know you were joking, but it's something I'm sensitive about.'",rating:"best",xp:20,feedback:"Self-advocacy at its finest. Private, honest about impact without assuming intent. Most people will respect this. If they don't, that tells you something important about them."},
+  {text:"Laugh and say 'Haha yeah, I'm working on it.' Move on.",rating:"partial",xp:8,feedback:"Self-deprecating humor works in the moment. But you absorbed the hit AND agreed with it. If this keeps happening, the joke becomes how people see you."},
+  {text:"Fire back: 'At least I have something to say, unlike your empty contributions!'",rating:"wrong",xp:0,feedback:"Escalation disguised as humor. The original joke was thoughtless; yours was targeted. Retaliation creates an enemy, not a solution."},
+],discussion:"When a joke hurts, does intent matter if the impact was real?"},
+
+{id:"q15",skill:"Digital Communication",type:"standard",title:"The Tone Gap",
+story:"You suggest meeting up with a friend. They respond: 'fine.' — lowercase, period, no emoji.",
+scenario:"Your brain says 'they're mad.' But maybe they're busy. Maybe that's how they text. Maybe they ARE annoyed. What do you do?",
+choices:[
+  {text:"Assume nothing. Reply normally: 'Cool! Usual spot at 3?' If there's a real problem, it'll become clear.",rating:"best",xp:20,feedback:"Text is terrible at conveying tone. Treating every 'fine.' as an attack exhausts everyone. Moving forward normally is a form of trust."},
+  {text:"Text: 'are u ok? that sounded kind of dry lol'",rating:"partial",xp:12,feedback:"Reasonable instinct. But if they WEREN'T annoyed, now you've made them think they did something wrong. Can create the very problem you worried about."},
+  {text:"Don't respond for a while. If they're being passive-aggressive, you won't chase them.",rating:"wrong",xp:0,feedback:"Now you're BOTH communicating through silence and assumptions. This is how small misunderstandings become real conflicts."},
+],discussion:"How much of what you 'read' in a text is actually there vs. what your brain adds?"},
+
+{id:"q16",skill:"Digital Communication",type:"coop",title:"The Screenshot Dilemma",
+story:"Friend Jada screenshots a DM from Quinn who said: 'I like [you] but they can be kind of a lot sometimes.' Jada says: 'Thought you should know.'",
+scenario:"Quinn said this in confidence. Jada broke that confidence. You have feelings about BOTH things. What do you do?",
+choices:[
+  {text:"Tell Jada: 'Honestly, I wish you hadn't shown me that. It was a private conversation. I'll try not to let it change how I see Quinn.'",rating:"best",xp:20,feedback:"Held Jada accountable for screenshot culture. Acknowledged private venting is normal. Chose not to act on information you weren't supposed to have."},
+  {text:"Confront Quinn: 'I know you said I can be 'a lot.' What do you mean?'",rating:"partial",xp:10,feedback:"Understandable, but confronting Quinn reveals Jada screenshotted their DMs. Now Quinn doesn't trust Jada. The information chain matters."},
+  {text:"Screenshot the screenshot and send it to another friend for their take.",rating:"wrong",xp:0,feedback:"The private comment has now traveled through THREE people. Each forward multiplies drama and betrays trust. The person who stops the chain has real social strength."},
+],coopNote:"🤝 Debate: Is Jada a good friend for telling you, or bad for breaking Quinn's confidence? Is Quinn wrong for venting privately? Take positions and argue.",discussion:"Is 'I thought you should know' ever really about helping, or is it about the drama of sharing?"},
+
+// R5: Social Problem-Solving + Emotional Intelligence
+{id:"q17",skill:"Social Problem-Solving",type:"coop",title:"The Reputation Repair",
+story:"Casey made a bad call during a public quest that embarrassed the guild. Other guilds are roasting you online. Casey feels terrible and has gone silent.",
+scenario:"Guild is split: public apology, kick Casey, defend online, or ignore it. Casey hasn't spoken to anyone in days. What does your group decide?",
+choices:[
+  {text:"Reach out to Casey privately first. THEN decide as a group: brief, dignified response online. Focus on the next quest as the real reputation repair.",rating:"best",xp:20,feedback:"Casey first, public response second. You can't decide about someone who isn't in the room. Brief public response is more dignified than long defense. Best reputation repair is the next great performance."},
+  {text:"Have Casey write a public apology explaining what happened and what they learned.",rating:"partial",xp:10,feedback:"Forced public apologies often feel performative and invite MORE criticism. Casey hasn't even talked to anyone yet — pressuring a public statement could make things worse."},
+  {text:"Kick Casey out and distance the guild from the mistake.",rating:"wrong",xp:0,feedback:"Throwing someone under the bus is a short-term fix and long-term culture destroyer. Every member now knows: mess up and we sacrifice you. That's not a team."},
+],coopNote:"🤝 Write the public response together (3 sentences max). Then write the private message to Casey. Compare the tone.",discussion:"How do the best organizations handle it when one member makes a public mistake?"},
+
+{id:"q18",skill:"Social Problem-Solving",type:"gray",title:"The Ethical Gray Zone",
+story:"Rival guild is exploiting a rule loophole — not cheating, but gaining an unfair advantage. It's legal but doesn't feel right.",
+scenario:"Your options: exploit the same loophole yourselves, or report it to the competition council (risking being labeled a snitch).",
+choices:[
+  {text:"Report it as a rule improvement suggestion: 'We noticed this gap that could be exploited. Here's how to fix it.' Not accusing anyone — improving the system.",rating:"best",xp:20,feedback:"Strategic and ethical. Framing as improvement rather than complaint fixes the problem without targeting anyone. You look like leaders, not snitches."},
+  {text:"Use the loophole yourselves. If the rules allow it, it's not cheating.",rating:"partial",xp:12,feedback:"Defensible logic — but you become what you're criticizing. And if the loophole closes later, everyone who used it gets scrutiny."},
+  {text:"Do nothing. Not your problem to police other guilds.",rating:"partial",xp:8,feedback:"Sometimes wise, but 'not my problem' can mask avoiding discomfort. If the advantage keeps growing, eventually it IS your problem."},
+],grayNote:"Genuinely hard. When is it worth trying to change a system vs. working within a broken one?",discussion:"Is exploiting a loophole the same as cheating? Where's the line?"},
+
+{id:"q19",skill:"Emotional Intelligence",type:"gray",title:"The Hidden Struggle",
+story:"Morgan has been irritable for weeks — snapping at people, showing up late, sloppy work. Others are filing a complaint. You run into Morgan alone — they look exhausted.",
+scenario:"People are losing patience. Morgan doesn't know about the complaint. What do you do?",
+choices:[
+  {text:"'Hey Morgan, I've noticed you seem really worn down. Is everything okay? People are noticing the changes and I wanted to talk to you before it becomes a bigger thing.'",rating:"best",xp:20,feedback:"Transparent about WHY you're asking, genuine concern, and a gift: giving Morgan a chance to course-correct before consequences land."},
+  {text:"Give Morgan a heads-up: 'Some people are considering a complaint. I don't know what's going on, but you might want to talk to the guild leader first.'",rating:"best",xp:20,feedback:"Direct and practical. You gave actionable information and let them decide what to do. Some people need strategy more than empathy. You respected their autonomy."},
+  {text:"Don't say anything. Not your responsibility.",rating:"partial",xp:8,feedback:"Technically true. But you have information that could help. Doing nothing is a choice with consequences too."},
+],grayNote:"A leads with emotional connection. B leads with practical information. Some people need empathy, some need a heads-up.",discussion:"Is it 'being in their business' to say something when someone's struggling?"},
+
+{id:"q20",skill:"Emotional Intelligence",type:"standard",title:"The Apology That Isn't",
+story:"After a disagreement, Lin says: 'Fine, I'm sorry you got upset.' That's the whole apology.",
+scenario:"It technically contains 'sorry.' But something feels off. The group is ready to move on. You don't feel resolved. What do you do?",
+choices:[
+  {text:"'I appreciate you saying something, but 'sorry you got upset' puts it on me for having feelings. I'm looking for you to acknowledge what happened, not just my reaction. Can we try this differently?'",rating:"best",xp:20,feedback:"You identified a non-apology without escalating. 'Sorry you got upset' expresses regret for YOUR reaction, not THEIR action. Explaining the difference is teaching a skill."},
+  {text:"Accept it and move on. Not everyone's great at apologies.",rating:"partial",xp:10,feedback:"Wisdom in not demanding perfection. But a pattern of accepting non-apologies teaches people those words are enough."},
+  {text:"'That's not a real apology and you know it.' Refuse to move on.",rating:"partial",xp:8,feedback:"Content is correct but 'you know it' is accusatory. Turns a teaching moment into a power struggle."},
+],discussion:"What elements does a genuine apology need? Practice giving one for a small, everyday situation."},
+];
+
+// BOSS BATTLES: 5 bosses, 3 rounds each
+const BOSSES=[
+{id:"boss1",name:"The Whisperer",emoji:"🐍",desc:"Spreads half-truths to divide groups from within.",victory:"The Whisperer's web of lies unravels as your council stands united!",defeat:"The Whisperer slips away... but you'll be ready next time.",discussion:"How do real-life manipulators divide groups? What patterns can you watch for?",rounds:[
+  {scenario:"The Whisperer tells you privately that two teammates have been complaining about you behind your back. They seem sincere. But you noticed the Whisperer talked to those teammates privately earlier too.",
+  choices:[
+    {text:"Recognize the manipulation — the Whisperer is creating paranoia. Go talk to your teammates directly and compare notes.",rating:"best",xp:15,feedback:"Pattern recognition! The Whisperer told you about THEM and probably told them about YOU. Going directly to the source cuts through the manipulation."},
+    {text:"Feel hurt but decide to watch your teammates more carefully for signs.",rating:"partial",xp:8,feedback:"You didn't act impulsively — good. But 'watching for signs' means the Whisperer succeeded in planting suspicion. That seed will grow."},
+    {text:"Confront your teammates angrily about what you heard.",rating:"wrong",xp:0,feedback:"You just did exactly what the Whisperer wanted — created conflict based on unverified information. The Whisperer wins."},
+  ]},
+  {scenario:"The Whisperer publicly suggests that one team member 'didn't really contribute' to the last mission. The team member looks stunned. Half the group seems unsure.",
+  choices:[
+    {text:"Immediately name specific contributions that person made. Then ask why the Whisperer is stirring things up.",rating:"best",xp:15,feedback:"You countered with FACTS, not feelings. Naming specifics is powerful — it's hard to argue against concrete evidence. And questioning the Whisperer's motives shifts scrutiny where it belongs."},
+    {text:"Comfort the team member privately afterward.",rating:"partial",xp:8,feedback:"Kind, but the damage was done publicly. Private comfort doesn't undo public humiliation. Sometimes you need to speak up in the moment."},
+    {text:"Stay silent — you don't want to pick sides.",rating:"wrong",xp:0,feedback:"Silence in the face of a false accusation IS picking a side — the Whisperer's. Not speaking up lets the lie stand."},
+  ]},
+  {scenario:"The Whisperer offers to 'mediate' the conflicts they created, positioning themselves as the peacemaker. Half the group thinks this is helpful.",
+  choices:[
+    {text:"Point out the Whisperer started these conflicts. A mediator shouldn't be the instigator.",rating:"best",xp:15,feedback:"You named the pattern. 'The person who created the problem shouldn't profit from solving it' is a principle worth defending. It takes courage to say this publicly."},
+    {text:"Decline the mediation but don't explain why.",rating:"partial",xp:8,feedback:"You refused the manipulation, which is something. But without explaining why, the Whisperer still looks helpful and you look uncooperative."},
+    {text:"Accept the help — at least someone's trying to fix things.",rating:"wrong",xp:0,feedback:"You just handed the Whisperer more power. They create chaos, then position themselves as the only solution. Classic manipulation."},
+  ]},
+]},
+
+{id:"boss2",name:"The Mirror",emoji:"🪞",desc:"Reflects your blind spots and hidden assumptions.",victory:"The Mirror cracks — you faced your biases with honesty and courage!",defeat:"The Mirror remains... but self-awareness grows with each attempt.",discussion:"What assumptions do you make about people before you even talk to them? Is anyone truly free of bias?",rounds:[
+  {scenario:"The Mirror shows two people: one in expensive armor gives a wrong answer. One in ragged clothes gives the right answer. The Mirror asks: 'Be honest — who would you have listened to first?'",
+  choices:[
+    {text:"Acknowledge that most people would listen to the well-dressed person first. That's a bias worth being aware of, even if you can't eliminate it entirely.",rating:"best",xp:15,feedback:"Honest self-awareness beats false claims of perfection. Naming a bias is the first step to counteracting it."},
+    {text:"Say you'd listen to both equally.",rating:"partial",xp:8,feedback:"Aspirational, but probably not fully honest. Studies show everyone has appearance biases. Claiming otherwise prevents growth."},
+    {text:"Say appearances don't matter at all to you.",rating:"wrong",xp:0,feedback:"Almost certainly not true, and claiming it blocks real self-reflection. The Mirror exposes what you won't admit."},
+  ]},
+  {scenario:"The Mirror replays a message you sent to a teacher vs. a friend vs. someone you dislike. It points out you put way more effort into being understood by some people than others.",
+  choices:[
+    {text:"Acknowledge you communicate more carefully with some people than others, and consider whether the people you put less effort into deserve more.",rating:"best",xp:15,feedback:"Real growth. We all modulate effort based on relationship — but the people we communicate with LEAST carefully might be the ones who need it MOST."},
+    {text:"Say it's natural to communicate differently with different people.",rating:"partial",xp:8,feedback:"True, but misses the deeper point. Natural doesn't mean ideal. The Mirror is asking you to examine your defaults."},
+    {text:"Say you treat everyone the same.",rating:"wrong",xp:0,feedback:"You don't. Nobody does. The Mirror just showed you the evidence."},
+  ]},
+  {scenario:"The Mirror replays something you said weeks ago that hurt someone — but you didn't realize it at the time. It asks: 'Does intent matter more than impact?'",
+  choices:[
+    {text:"Both matter, but impact is what the other person experiences. Good intentions don't undo harm, but they should shape how you move forward.",rating:"best",xp:15,feedback:"Nuanced and honest. Intent and impact aren't a binary — they interact. This answer shows you can hold two ideas at once."},
+    {text:"Intent matters most — you can't control how people react.",rating:"partial",xp:8,feedback:"Intent does matter, but 'you can't control reactions' can become an excuse to never examine your impact."},
+    {text:"Impact matters most — if someone's hurt, you're wrong.",rating:"partial",xp:8,feedback:"Impact matters deeply, but this makes every hurt person automatically right. Sometimes people misread intent. The truth is more complex."},
+  ]},
+]},
+
+{id:"boss3",name:"The Puppetmaster",emoji:"🎭",desc:"Uses social pressure, guilt, and favors to control others.",victory:"The Puppetmaster's strings are cut! Your council stands free!",defeat:"The strings tighten... but awareness of the manipulation grows.",discussion:"What are the warning signs that someone is using social pressure to control you? How do 'nice' people manipulate?",rounds:[
+  {scenario:"The Puppetmaster has done unsolicited favors for weeks — supplies, help, support. Now they want something uncomfortable in return: 'After everything I've done for you...'",
+  choices:[
+    {text:"'I appreciate what you've done, but favors shouldn't come with strings. I can't do this, and real generosity doesn't create obligations.'",rating:"best",xp:15,feedback:"Named the tactic. Uninvited favors used as leverage is textbook manipulation. Real generosity doesn't come with an invoice."},
+    {text:"Do what they ask because you feel guilty about the favors.",rating:"wrong",xp:0,feedback:"Guilt compliance is exactly what the Puppetmaster designed. The favors were never free — they were deposits for this moment."},
+    {text:"Accept future favors but refuse this request without explaining.",rating:"partial",xp:8,feedback:"You refused this time, but you'll be right back here. Without naming the pattern, the cycle continues."},
+  ]},
+  {scenario:"The Puppetmaster tries to isolate one teammate by telling everyone: 'You don't really need them.' They offer to fill that role themselves.",
+  choices:[
+    {text:"Alert the targeted teammate AND address the behavior with the group. 'Has anyone noticed the pattern here? We're being played.'",rating:"best",xp:15,feedback:"You protected the target and educated the group. Calling out the PATTERN is more powerful than fighting one instance."},
+    {text:"Just include the teammate without confronting the Puppetmaster.",rating:"partial",xp:8,feedback:"Kind to the teammate, but the Puppetmaster keeps operating. You treated the symptom, not the disease."},
+    {text:"The Puppetmaster has a point — the teammate hasn't been pulling their weight.",rating:"wrong",xp:0,feedback:"Even if it's true, notice HOW the Puppetmaster raised it — by positioning themselves as the replacement. The goal isn't improvement; it's control."},
+  ]},
+  {scenario:"The Puppetmaster warns: 'If you don't support me, people will think you're difficult. I'm just looking out for you.'",
+  choices:[
+    {text:"Name it: 'That's a threat disguised as advice. I'll take my chances on people thinking for themselves.'",rating:"best",xp:15,feedback:"Direct and powerful. 'A threat disguised as advice' is exactly what it is. When someone frames pressure as 'looking out for you,' they're looking out for themselves."},
+    {text:"Walk away without responding.",rating:"partial",xp:8,feedback:"You didn't comply — that's something. But without naming the tactic, the Puppetmaster uses it on the next person."},
+    {text:"Reconsider — maybe they have a point about your reputation.",rating:"wrong",xp:0,feedback:"That doubt? That's the Puppetmaster's best weapon. They just made you question reality using your own insecurities."},
+  ]},
+]},
+
+{id:"boss4",name:"The Gaslighter",emoji:"💀",desc:"Makes you doubt your own memory, perception, and worth.",victory:"The fog clears — you held onto reality when someone tried to steal it!",defeat:"The doubt lingers... but naming the tactic is half the battle.",discussion:"What does gaslighting look like in real life? How is it different from a genuine disagreement?",rounds:[
+  {scenario:"You clearly remember the Gaslighter agreeing to a plan yesterday. Today they say: 'I never said that. You must have misunderstood.' No witnesses.",
+  choices:[
+    {text:"Trust your memory: 'I remember clearly. If there's confusion, let's clarify the plan going forward.' Don't let them rewrite history.",rating:"best",xp:15,feedback:"You held your ground without getting dragged into a 'did not / did too' loop. Redirecting to 'going forward' is smart — you preserved reality without needing to win the argument."},
+    {text:"Think 'maybe I DID misunderstand...' and let it go.",rating:"wrong",xp:0,feedback:"This is exactly what gaslighting does — makes you doubt YOURSELF. If this keeps happening, you'll stop trusting your own memory. That's the goal."},
+    {text:"Get angry and insist they're lying.",rating:"partial",xp:8,feedback:"Your instinct is right — they're distorting truth. But anger makes YOU look unreasonable, which is exactly how gaslighting works. Calm certainty is more powerful."},
+  ]},
+  {scenario:"After you make a valid point in a meeting, the Gaslighter says: 'Why are you so emotional about this?' You were perfectly calm.",
+  choices:[
+    {text:"Don't take the bait: 'I'm not emotional — I'm making a point. Do you have a response to what I actually said?'",rating:"best",xp:15,feedback:"Redirected to substance. 'Why are you so emotional?' is designed to make people either GET emotional or shrink. You did neither."},
+    {text:"Stop talking and tone yourself down, second-guessing your delivery.",rating:"wrong",xp:0,feedback:"They just silenced you without addressing your point. The 'emotional' label made you police yourself instead of holding your ground."},
+    {text:"Get visibly upset, saying 'I'm NOT emotional!'",rating:"partial",xp:5,feedback:"Now you look emotional — proving their point. The trap is designed to make any reaction look like overreaction."},
+  ]},
+  {scenario:"The Gaslighter praises you publicly but undermines you privately. When you bring this up, they say: 'I'm your biggest supporter! Why would I undermine you?'",
+  choices:[
+    {text:"Focus on behaviors: 'In the meeting you praised my work. Privately you told Alex my approach was wrong. Those don't match. I need consistency.'",rating:"best",xp:15,feedback:"Specific, factual, undeniable. You described TWO concrete actions that contradict each other. That's harder to dismiss than 'I feel undermined.'"},
+    {text:"Decide you must be misreading things since they're so nice publicly.",rating:"wrong",xp:0,feedback:"Public kindness doesn't cancel private sabotage. You're choosing the comfortable illusion over uncomfortable truth."},
+    {text:"Confront them publicly to force consistency.",rating:"partial",xp:8,feedback:"Understandable urge, but public confrontation lets them play victim. Private, specific, factual is more effective."},
+  ]},
+]},
+
+{id:"boss5",name:"The Shadow Lord",emoji:"👑",desc:"Weaponizes tone, silence, hierarchy, and your own desire to be liked. The final test.",victory:"The Shadow Lord falls! Your council has proven that social intelligence is the greatest power of all!",defeat:"The Shadow Lord endures... but you've grown stronger than you know.",discussion:"The Shadow Lord said 'nice people finish last.' Is social skill about being nice, or something deeper?",rounds:[
+  {scenario:"The Shadow Lord offers a deal: give you what you want, but one group member must be excluded. 'Vote on who to sacrifice. It's the democratic way.'",
+  choices:[
+    {text:"Refuse the premise: 'We don't sacrifice our own. If you can't deal with all of us, there's no deal.'",rating:"best",xp:20,feedback:"You rejected a rigged choice. The Shadow Lord wanted you to turn on each other. Refusing the frame is the most powerful move."},
+    {text:"Try to negotiate a deal that includes everyone.",rating:"partial",xp:10,feedback:"Better than voting someone out, but you're still playing the Shadow Lord's game. Sometimes the right answer is to reject the entire premise."},
+    {text:"Hold the vote — it IS the fairest way to decide.",rating:"wrong",xp:0,feedback:"Democracy only works when the choices are fair. Voting on who to sacrifice isn't democracy — it's forced cruelty with majority approval."},
+  ]},
+  {scenario:"The Shadow Lord reveals an embarrassing secret about one teammate — something real. 'You should know who you're really working with.'",
+  choices:[
+    {text:"'Everyone has a past. Using private information as a weapon says more about you than about them.' Then check on your teammate.",rating:"best",xp:20,feedback:"You refused to let weaponized information change your loyalty. Checking on the teammate shows the group that trust isn't conditional on perfection."},
+    {text:"Don't react to the secret, but don't defend the teammate either.",rating:"partial",xp:10,feedback:"Not reacting protects you but abandons your teammate. In that moment, silence feels a lot like agreement."},
+    {text:"The information changes how you see your teammate.",rating:"wrong",xp:0,feedback:"The Shadow Lord just proved their point — that people can be turned on each other with the right information. Your loyalty was conditional all along."},
+  ]},
+  {scenario:"The Shadow Lord's final words: 'Nice people finish last. The people who get ahead are willing to do what you won't.'",
+  choices:[
+    {text:"'Social skills aren't about being nice. They're about building trust, reading situations, and creating teams stronger than any individual. That's not weakness — it's the hardest strategy there is.'",rating:"best",xp:20,feedback:"THIS is the answer. Everything you've practiced in this campaign — reading rooms, navigating conflict, setting boundaries, advocating for yourself — none of it is about being 'nice.' It's about being EFFECTIVE."},
+    {text:"Disagree but can't articulate why they're wrong.",rating:"partial",xp:10,feedback:"Your instinct is right — they ARE wrong. But not being able to explain why means the doubt lingers. The ability to defend your values is part of having them."},
+    {text:"Worry they might be right.",rating:"wrong",xp:0,feedback:"The Shadow Lord's philosophy only works in a world without trust. And trust is built by exactly the skills you've been practicing. Don't give up now."},
+  ]},
+]},
+];
+
+// Levels
+const LVL_T=[0,30,80,150,240,340,460,600,760,950];
+const LVL_N=["Initiate","Apprentice","Adept","Veteran","Commander","Warden","Champion","Shadowmaster","Grandmaster","Legendary"];
+function getLv(xp){for(let i=LVL_T.length-1;i>=0;i--)if(xp>=LVL_T[i])return i;return 0;}
+function nxtXP(xp){const l=getLv(xp);return l>=LVL_T.length-1?null:LVL_T[l+1];}
+function xpPct(xp){const l=getLv(xp),n=nxtXP(xp),t=LVL_T[l];return n?((xp-t)/(n-t))*100:100;}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// State
+let mode=null,screen="mode-select",selClass=null;
+let dmParty=[],dmProgress=0,dmCur=null,dmPhase="",dmAnswers={},dmBossRound=0,dmBossWins=0;
+let pData=null,pQuest=null,pChoice=null,pFB=false,pFilter="All";
+const DK="pqsc2-dm",PK="pqsc2-p";
+function saveDM(){try{localStorage.setItem(DK,JSON.stringify({party:dmParty,progress:dmProgress}))}catch(e){}}
+function loadDM(){try{const r=JSON.parse(localStorage.getItem(DK));if(r){dmParty=r.party||[];dmProgress=r.progress||0;}}catch(e){}}
+function saveP(){try{localStorage.setItem(PK,JSON.stringify(pData))}catch(e){}}
+function loadP(){try{const r=localStorage.getItem(PK);if(r)pData=JSON.parse(r);}catch(e){}}
+
+function stars(){const f=document.getElementById('starField');for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.5+.5;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${Math.random()*3+2}s;--delay:${Math.random()*5}s`;f.appendChild(s);}}
+
+// Which quest/boss is at each map node?
+function nodeContent(idx){
+  const node=MAP[idx];
+  if(node.type==="quest") {
+    const qIdx = [0,1,2,3,null,4,5,6,7,null,8,9,10,11,null,12,13,14,15,null,16,17,18,19,null][idx];
+    return qIdx!==null?{kind:"quest",data:QUESTS[qIdx]}:null;
+  }
+  const bIdx=[null,null,null,null,0,null,null,null,null,1,null,null,null,null,2,null,null,null,null,3,null,null,null,null,4][idx];
+  return bIdx!==null?{kind:"boss",data:BOSSES[bIdx]}:null;
+}
+function nodeTitle(idx){const c=nodeContent(idx);if(!c)return"?";return c.kind==="boss"?c.data.name:c.data.title;}
+function nodeStatus(idx){return idx<dmProgress?"done":idx===dmProgress?"current":"locked";}
+
+function render(){
+  const a=document.getElementById('app');a.className=mode==='dm'?'container wide':'container';
+  if(screen==='mode-select')a.innerHTML=rModeSelect();
+  else if(mode==='dm'){
+    if(screen==='dm-setup')a.innerHTML=rDMSetup();
+    else if(screen==='dm-map')a.innerHTML=rDMMap();
+    else if(screen==='dm-quest')a.innerHTML=rDMQuest();
+    else if(screen==='dm-boss')a.innerHTML=rDMBoss();
+  }else{
+    if(screen==='p-create')a.innerHTML=rPCreate();
+    else if(screen==='p-hub')a.innerHTML=rPHub();
+    else if(screen==='p-quest')a.innerHTML=rPQuest();
+  }
+}
+
+// ===== MODE SELECT =====
+function rModeSelect(){
+  return `<div class="center" style="padding-top:32px;margin-bottom:24px"><div style="font-size:48px;margin-bottom:6px">⚔️🌑</div><h1 class="title">Pragmatic Quest</h1><p style="font-family:'Cinzel',serif;font-size:14px;color:var(--purple);letter-spacing:3px;margin-top:3px">SHADOW COUNCIL</p><p class="sub" style="margin-top:6px">A Social Communication RPG</p></div>
+  <div class="flex gap-16 wrap" style="justify-content:center"><div class="mode-card" onclick="selMode('dm')"><div class="icon">🏰</div><div class="name">Shadow Master</div><div class="desc">Promethean board — run campaign</div></div><div class="mode-card" onclick="selMode('p')"><div class="icon">⚔️</div><div class="name">Shadow Agent</div><div class="desc">Student Chromebook — solo quest</div></div></div>
+  <div class="center mt-20"><div class="card" style="max-width:480px;margin:0 auto"><div style="font-size:11px;color:var(--dim);line-height:1.7"><strong style="color:var(--gold)">⚔️ Campaign Mode:</strong> Travel across 5 regions · Defeat 5 bosses · 20 quests + boss battles<br><span style="color:var(--green)">●</span> Best = full XP · <span style="color:var(--yellow)">●</span> Partial = some XP · <span style="color:var(--red)">●</span> Wrong = 0 XP · <span style="color:var(--blue)">🤝</span> Co-op · <span style="color:var(--purple)">⚖️</span> Gray Area</div></div></div>`;
+}
+function selMode(m){mode=m==='dm'?'dm':'player';if(m==='dm'){loadDM();screen=dmParty.length?'dm-map':'dm-setup';}else{loadP();screen=pData?'p-hub':'p-create';}render();}
+
+// ===== DM SETUP =====
+function rDMSetup(){
+  let h=`<div class="center" style="padding-top:14px;margin-bottom:14px"><div style="font-size:32px">🏰</div><h1 class="title" style="font-size:24px">Build Your Council</h1></div><div class="card"><h2 class="section">🎭 Add Heroes</h2>`;
+  dmParty.forEach((p,i)=>{h+=`<div class="flex gap-12 mb-8" style="align-items:center"><span style="font-size:20px">${p.e}</span><span style="font-weight:700;font-size:14px">${esc(p.n)}</span><span style="color:${p.c};font-size:11px;font-weight:700">${p.cl}</span><button class="btn-outline" style="margin-left:auto;padding:3px 10px;font-size:10px;color:var(--red);border-color:rgba(217,83,79,.2)" onclick="dmParty.splice(${i},1);saveDM();render()">✕</button></div>`;});
+  if(dmParty.length<8){h+=`<div class="flex gap-8 mt-8 wrap" style="align-items:flex-end"><div style="flex:1;min-width:120px"><label>Name</label><input type="text" class="small-input" id="nn" placeholder="Name..." maxlength="20" style="padding:8px 10px;font-size:13px"></div><div style="flex:2;min-width:220px"><label>Class</label><div class="flex gap-8 wrap">${CL.map((c,i)=>`<button class="btn-outline" style="padding:4px 9px;font-size:10px;border-color:${selClass===i?c.color:'rgba(255,255,255,.1)'};color:${selClass===i?c.color:'var(--gold)'}" onclick="selClass=${i};render()">${c.emoji} ${c.name}</button>`).join('')}</div></div></div><button class="btn btn-sm mt-12" style="width:auto" onclick="addM()">+ Add</button>`;}
+  h+=`</div>`;if(dmParty.length>=1)h+=`<button class="btn mt-8" onclick="screen='dm-map';render()">Enter the Shadow Council 🌑</button>`;return h;
+}
+function addM(){const inp=document.getElementById('nn');const name=inp?.value?.trim();if(!name||selClass===null)return;const c=CL[selClass];dmParty.push({n:name,cl:c.name,e:c.emoji,c:c.color,xp:0,cq:[],sp:{}});saveDM();selClass=null;render();}
+
+// ===== DM MAP =====
+function rDMMap(){
+  let h=`<div class="flex gap-12 mb-12 wrap" style="justify-content:space-between"><div class="flex gap-12"><span style="font-size:26px">🏰</span><div><h1 class="title" style="font-size:20px;text-align:left;margin:0">Shadow Council</h1><p style="font-size:10px;color:var(--dim)">Campaign Map · ${dmProgress}/${MAP.length} nodes cleared</p></div></div><div class="flex gap-8"><button class="btn-outline" style="font-size:10px;padding:4px 10px" onclick="screen='dm-setup';render()">⚙️ Party</button><button class="reset-btn" onclick="resetDM()">🗑️ Reset</button></div></div>`;
+
+  // Party bar
+  h+=`<div class="card" style="padding:14px"><div class="flex gap-12 wrap">`;
+  dmParty.forEach(p=>{const lv=getLv(p.xp);h+=`<div class="party-member" style="padding:10px"><div class="flex gap-8"><span style="font-size:18px">${p.e}</span><div><div style="font-size:13px;font-weight:800">${esc(p.n)}</div><div style="font-size:9px;color:${p.c};font-weight:700">Lv.${lv} ${LVL_N[lv]}</div></div></div><div class="xp-track mt-8" style="height:8px"><div class="xp-fill" style="width:${xpPct(p.xp)}%;background:${p.c}"></div></div></div>`;});
+  h+=`</div></div>`;
+
+  // MAP
+  h+=`<div class="card" style="padding:14px"><h2 class="section">🗺️ Quest Map</h2><div class="map-wrap"><div class="map-inner">`;
+
+  // Region labels
+  REGIONS.forEach((r,i)=>{
+    const y=[6,24,42,60,78][i];
+    const x=i%2===0?88:2;
+    h+=`<div class="region-label" style="left:${x}%;top:${y}%;${i%2===0?'text-align:right':''}writing-mode:${i%2===0?'vertical-rl':'vertical-lr'}">${r.name}</div>`;
+  });
+
+  // SVG paths
+  h+=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
+  for(let i=0;i<MAP.length-1;i++){
+    const a=MAP[i],b=MAP[i+1];
+    const st=nodeStatus(i);
+    const col=st==='done'?'rgba(212,175,55,.4)':st==='current'?'rgba(212,175,55,.25)':'rgba(255,255,255,.06)';
+    h+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width=".6" stroke-linecap="round"/>`;
+  }
+  h+=`</svg>`;
+
+  // Nodes
+  MAP.forEach((nd,i)=>{
+    const st=nodeStatus(i);
+    const content=nodeContent(i);
+    const title=content?content.kind==='boss'?content.data.emoji:nodeTitle(i):'?';
+    const dotCls=nd.type==='boss'?'node-dot boss-dot':'node-dot quest-dot';
+    const extraCls=st==='done'?' done':st==='current'?' current':'';
+    const click=st!=='locked'?`onclick="mapClick(${i})"`:''
+    const label=content?content.kind==='boss'?content.data.name:content.data.title:'';
+    const labelCls=st==='current'?'node-label current-label':'node-label';
+    h+=`<div class="map-node${st==='locked'?' locked':''}" style="left:${nd.x}%;top:${nd.y}%" ${click}><div class="${dotCls}${extraCls}">${nd.type==='boss'?(content?content.data.emoji:'💀'):(st==='done'?'✓':(i+1))}</div><div class="${labelCls}">${label.length>18?label.substring(0,16)+'…':label}</div></div>`;
+  });
+
+  // Party token at current position
+  if(dmProgress<MAP.length){
+    const cur=MAP[dmProgress];
+    h+=`<div class="party-token" style="left:${cur.x}%;top:${cur.y-7}%">${dmParty.map(p=>p.e).join('')}</div>`;
+  }
+
+  h+=`</div></div></div>`;
+
+  // Current quest info
+  if(dmProgress<MAP.length){
+    const cur=nodeContent(dmProgress);
+    if(cur){
+      const isBoss=cur.kind==='boss';
+      h+=`<div class="card glow" style="text-align:center;padding:20px"><div style="font-size:${isBoss?'36':'28'}px;margin-bottom:8px">${isBoss?cur.data.emoji:'⚔️'}</div><h3 class="quest-title" style="margin-bottom:6px">${isBoss?cur.data.name:cur.data.title}</h3>`;
+      if(isBoss){h+=`<p style="font-size:13px;color:var(--dim);margin-bottom:14px">${cur.data.desc}</p><button class="btn btn-red btn-sm" style="font-size:15px;padding:14px 40px;width:auto" onclick="startBoss(${dmProgress})">⚔️ FIGHT THE BOSS ⚔️</button>`;}
+      else{
+        const tb=cur.data.type==='coop'?' <span class="badge-coop">🤝 CO-OP</span>':cur.data.type==='gray'?' <span class="badge-gray">⚖️ GRAY</span>':'';
+        h+=`<div class="badge mb-8">${cur.data.skill}</div>${tb}<p style="font-size:13px;color:var(--dim);margin:10px 0">${cur.data.story.substring(0,120)}...</p><button class="btn btn-sm btn-orange" style="font-size:15px;padding:14px 40px;width:auto" onclick="startQuest(${dmProgress})">Begin Quest →</button>`;
+      }
+      h+=`</div>`;
+    }
+  }else{
+    h+=`<div class="card glow center" style="padding:30px"><div style="font-size:48px;margin-bottom:12px">👑🎉👑</div><h3 class="quest-title" style="color:var(--green)">CAMPAIGN COMPLETE!</h3><p style="color:var(--dim);font-size:14px">Your council has conquered the Shadow Throne.</p></div>`;
+  }
+  return h;
+}
+
+function mapClick(idx){
+  const st=nodeStatus(idx);if(st==='locked')return;
+  const c=nodeContent(idx);if(!c)return;
+  if(st==='done'){/* allow replay for review */}
+  if(c.kind==='boss')startBoss(idx);else startQuest(idx);
+}
+function startQuest(idx){const c=nodeContent(idx);dmCur={idx,quest:c.data};dmPhase='story';dmAnswers={};screen='dm-quest';render();window.scrollTo(0,0);}
+function startBoss(idx){const c=nodeContent(idx);dmCur={idx,boss:c.data};dmPhase='intro';dmBossRound=0;dmBossWins=0;dmAnswers={};screen='dm-boss';render();window.scrollTo(0,0);}
+
+// ===== DM QUEST (same as before, simplified) =====
+function rDMQuest(){
+  const q=dmCur.quest;const phases=['story','scenario','choices','reveal','discussion'];const labels={story:'📖',scenario:'🎭',choices:'🤔',reveal:'✨',discussion:'💬'};
+  let h=`<button class="btn-outline mb-12" onclick="screen='dm-map';render()">← Map</button>`;
+  const tb=q.type==='coop'?'<span class="badge-coop" style="margin-left:6px">🤝</span>':q.type==='gray'?'<span class="badge-gray" style="margin-left:6px">⚖️</span>':'';
+  h+=`<div class="flex gap-8 mb-12 wrap" style="justify-content:space-between"><div><div class="badge mb-4">${q.skill}</div>${tb}<h3 class="quest-title" style="margin-top:6px;margin-bottom:0">${q.title}</h3></div><div class="flex gap-4 wrap">${phases.map(p=>`<button class="chip ${dmPhase===p?'active':''}" onclick="dmPhase='${p}';render()">${labels[p]}</button>`).join('')}</div></div>`;
+
+  if(dmPhase==='story'){h+=`<div class="card glow" style="padding:32px 24px"><p class="dm-story">${q.story}</p><div class="center mt-20"><button class="btn btn-sm btn-orange" style="width:auto;padding:12px 28px" onclick="dmPhase='scenario';render()">Continue →</button></div></div>`;}
+  else if(dmPhase==='scenario'){h+=`<div class="card glow" style="padding:32px 24px"><h2 class="section center" style="color:var(--orange)">🎭 The Situation</h2><p class="dm-scenario mt-12">${q.scenario}</p>${q.type==='coop'?'<div class="coop-box mt-12"><strong style="color:var(--blue)">🤝 Discuss together before answering.</strong></div>':''}<div class="center mt-20"><button class="btn btn-sm btn-purple" style="width:auto;padding:12px 28px" onclick="dmPhase='choices';render()">Show Choices →</button></div></div>`;}
+  else if(dmPhase==='choices'){
+    h+=`<div class="card"><h2 class="section center">What's your move?</h2>${q.choices.map((c,i)=>`<div class="dm-choice-display"><span class="letter">${'ABC'[i]}.</span>${esc(c.text)}</div>`).join('')}</div>`;
+    h+=`<div class="card"><h2 class="section">📋 Answers</h2>${dmParty.map((p,pi)=>`<div class="flex gap-12 mb-8"><div class="flex gap-8" style="min-width:100px"><span style="font-size:16px">${p.e}</span><span style="font-weight:700;font-size:12px">${esc(p.n)}</span></div><div class="flex gap-8">${q.choices.map((c,ci)=>{const sel=dmAnswers[pi]===ci;let cls='answer-btn';if(sel)cls+=c.rating==='best'?' best-mark':c.rating==='partial'?' partial-mark':' wrong-mark';return`<button class="${cls}" onclick="dmAnswers[${pi}]=${dmAnswers[pi]===ci?'undefined':ci};render()">${'ABC'[ci]}</button>`;}).join('')}</div></div>`).join('')}<div class="center mt-12"><button class="btn btn-sm btn-green" style="width:auto;padding:12px 28px" onclick="revealQ()">✨ Reveal ✨</button></div></div>`;
+  }
+  else if(dmPhase==='reveal'){
+    h+=`<div class="card glow"><div class="big-reveal">Results</div>${q.choices.map((c,i)=>{let cls='dm-choice-display';if(c.rating==='best')cls+=' best-reveal';else if(c.rating==='partial')cls+=' partial-reveal';else cls+=' wrong-reveal';const tag=c.rating==='best'?` <span style="color:var(--green);font-weight:800">✅ ${c.xp} XP</span>`:c.rating==='partial'?` <span style="color:var(--yellow);font-weight:800">🔶 ${c.xp} XP</span>`:` <span style="color:var(--red);font-weight:800">❌ 0</span>`;return`<div class="${cls}"><span class="letter">${'ABC'[i]}.</span>${esc(c.text)}${tag}<div style="margin-top:6px;font-size:12px;color:#b8a890;border-top:1px solid rgba(255,255,255,.05);padding-top:6px">${c.feedback}</div></div>`;}).join('')}${q.grayNote?`<div class="gray-note"><strong style="color:var(--purple)">⚖️</strong> ${q.grayNote}</div>`:''}</div>`;
+    h+=`<div class="center mt-8"><button class="btn btn-sm btn-orange" style="width:auto;padding:12px 28px" onclick="dmPhase='discussion';render()">💬 Discuss →</button></div>`;
+  }
+  else if(dmPhase==='discussion'){
+    h+=`<div class="card glow" style="padding:28px"><h2 class="section center" style="color:var(--orange)">💬 Discussion</h2><p style="font-size:16px;line-height:1.7;text-align:center;font-style:italic;margin-top:10px">"${q.discussion}"</p>${q.coopNote?`<div class="coop-box mt-12"><p style="font-size:12px;line-height:1.6;color:var(--text);margin:0">${q.coopNote}</p></div>`:''}<div class="center mt-20"><button class="btn btn-sm" style="width:auto;padding:12px 28px" onclick="finishNode()">Complete & Return →</button></div></div>`;
+  }
+  return h;
+}
+function revealQ(){
+  const q=dmCur.quest;dmParty.forEach((p,i)=>{const ans=dmAnswers[i];if(ans!==undefined){const ch=q.choices[ans];const ol=getLv(p.xp);p.xp+=ch.xp;if(!p.cq.includes(q.id))p.cq.push(q.id);if(ch.rating!=='wrong')p.sp[q.skill]=(p.sp[q.skill]||0)+1;if(getLv(p.xp)>ol)setTimeout(()=>showOL(p,getLv(p.xp)),800);}});saveDM();dmPhase='reveal';render();window.scrollTo(0,0);
+}
+function finishNode(){if(dmCur.idx===dmProgress)dmProgress++;saveDM();dmCur=null;screen='dm-map';render();window.scrollTo(0,0);}
+
+// ===== DM BOSS =====
+function rDMBoss(){
+  const b=dmCur.boss;
+  let h=`<button class="btn-outline mb-12" onclick="screen='dm-map';render()">← Retreat to Map</button>`;
+
+  if(dmPhase==='intro'){
+    h+=`<div class="card glow" style="padding:36px;text-align:center"><div style="font-size:64px;margin-bottom:10px">${b.emoji}</div><h3 class="quest-title" style="font-size:28px;color:var(--red)">${b.name}</h3><p style="font-size:16px;color:var(--dim);margin:12px 0;font-style:italic">${b.desc}</p><div style="font-size:13px;color:var(--dim);margin-bottom:20px">3 rounds · Win 2 to defeat · XP earned each round</div><button class="btn btn-red btn-sm" style="font-size:16px;padding:14px 40px;width:auto" onclick="dmPhase='round';dmBossRound=0;render()">⚔️ BEGIN BATTLE ⚔️</button></div>`;
+    return h;
+  }
+
+  // Round indicators
+  const roundInd=Array.from({length:3},(_, i)=>{
+    let cls='round-indicator';
+    if(i<dmBossRound){cls+=dmBossRoundResults&&dmBossRoundResults[i]?' won':' lost';}
+    else if(i===dmBossRound)cls+=' current';
+    return`<span class="${cls}">${i+1}</span>`;
+  }).join('');
+
+  // Boss HP bar (starts at 3, loses 1 per round won)
+  const hpPct=Math.max(0,((3-dmBossWins)/3)*100);
+
+  h+=`<div class="card"><div class="flex gap-12" style="justify-content:space-between"><div class="flex gap-8"><span style="font-size:28px">${b.emoji}</span><div><div style="font-family:'Cinzel',serif;font-size:18px;color:var(--red);font-weight:700">${b.name}</div><div style="font-size:11px;color:var(--dim)">Rounds: ${roundInd}</div></div></div><div style="text-align:right"><div style="font-size:11px;color:var(--dim)">Wins: ${dmBossWins}/3</div></div></div><div class="boss-hp"><div class="boss-hp-fill" style="width:${hpPct}%"></div></div></div>`;
+
+  if(dmPhase==='round'){
+    const rd=b.rounds[dmBossRound];
+    h+=`<div class="card glow" style="padding:28px"><h2 class="section center" style="color:var(--red)">⚔️ Round ${dmBossRound+1} of 3</h2><p class="dm-scenario mt-12">${rd.scenario}</p></div>`;
+    h+=`<div class="card"><h2 class="section">Choices</h2>${rd.choices.map((c,i)=>`<div class="dm-choice-display"><span class="letter">${'ABC'[i]}.</span>${esc(c.text)}</div>`).join('')}</div>`;
+    h+=`<div class="card"><h2 class="section">📋 Answers</h2>${dmParty.map((p,pi)=>`<div class="flex gap-12 mb-8"><div class="flex gap-8" style="min-width:100px"><span style="font-size:16px">${p.e}</span><span style="font-weight:700;font-size:12px">${esc(p.n)}</span></div><div class="flex gap-8">${rd.choices.map((c,ci)=>{const sel=dmAnswers[pi]===ci;let cls='answer-btn';if(sel)cls+=c.rating==='best'?' best-mark':c.rating==='partial'?' partial-mark':' wrong-mark';return`<button class="${cls}" onclick="dmAnswers[${pi}]=${dmAnswers[pi]===ci?'undefined':ci};render()">${'ABC'[ci]}</button>`;}).join('')}</div></div>`).join('')}<div class="center mt-12"><button class="btn btn-sm btn-green" style="width:auto;padding:12px 28px" onclick="revealBossRound()">✨ Reveal Round ${dmBossRound+1} ✨</button></div></div>`;
+  }
+  else if(dmPhase==='round-reveal'){
+    const rd=b.rounds[dmBossRound];
+    const anyBest=Object.values(dmAnswers).some(a=>a!==undefined&&rd.choices[a]?.rating==='best');
+    const roundWon=anyBest;
+    h+=`<div class="card glow"><div class="big-reveal" style="color:${roundWon?'var(--green)':'var(--red)'}">${roundWon?'✅ Round Won!':'❌ Round Lost!'}</div>${rd.choices.map((c,i)=>{let cls='dm-choice-display';if(c.rating==='best')cls+=' best-reveal';else if(c.rating==='partial')cls+=' partial-reveal';else cls+=' wrong-reveal';const tag=c.rating==='best'?` <span style="color:var(--green);font-weight:800">✅ ${c.xp} XP</span>`:c.rating==='partial'?` <span style="color:var(--yellow);font-weight:800">🔶 ${c.xp} XP</span>`:` <span style="color:var(--red);font-weight:800">❌ 0</span>`;return`<div class="${cls}"><span class="letter">${'ABC'[i]}.</span>${esc(c.text)}${tag}<div style="margin-top:6px;font-size:12px;color:#b8a890;border-top:1px solid rgba(255,255,255,.05);padding-top:6px">${c.feedback}</div></div>`;}).join('')}</div>`;
+    if(dmBossRound<2){
+      h+=`<div class="center mt-8"><button class="btn btn-sm btn-red" style="width:auto;padding:12px 28px" onclick="nextBossRound()">⚔️ Next Round →</button></div>`;
+    }else{
+      const won=dmBossWins>=2;
+      h+=`<div class="card glow" style="text-align:center;padding:30px"><div style="font-size:48px;margin-bottom:8px">${won?'🎉👑🎉':'💀'}</div><h3 class="quest-title" style="color:${won?'var(--green)':'var(--red)'}">${won?'BOSS DEFEATED!':'BOSS SURVIVES...'}</h3><p style="font-size:14px;color:var(--dim);margin:10px 0">${won?b.victory:b.defeat}</p>${won?`<div style="font-size:16px;color:var(--gold);font-weight:800;margin:12px 0">🏆 +25 Bonus XP per member!</div>`:'<p style="font-size:12px;color:var(--dim)">You can try again from the map.</p>'}<button class="btn btn-sm mt-12" style="width:auto;padding:12px 28px" onclick="finishBoss(${won?'true':'false'})">💬 Discussion →</button></div>`;
+    }
+  }
+  else if(dmPhase==='boss-discussion'){
+    h+=`<div class="card glow" style="padding:28px"><h2 class="section center" style="color:var(--orange)">💬 Boss Debrief</h2><p style="font-size:16px;line-height:1.7;text-align:center;font-style:italic;margin-top:10px">"${b.discussion}"</p><div class="center mt-20"><button class="btn btn-sm" style="width:auto;padding:12px 28px" onclick="endBoss()">Return to Map →</button></div></div>`;
+  }
+  return h;
+}
+var dmBossRoundResults=[];
+function revealBossRound(){
+  const b=dmCur.boss,rd=b.rounds[dmBossRound];
+  let roundWon=false;
+  dmParty.forEach((p,i)=>{const ans=dmAnswers[i];if(ans!==undefined){const ch=rd.choices[ans];const ol=getLv(p.xp);p.xp+=ch.xp;if(ch.rating==='best')roundWon=true;if(getLv(p.xp)>ol)setTimeout(()=>showOL(p,getLv(p.xp)),800);}});
+  if(roundWon)dmBossWins++;
+  if(!dmBossRoundResults)dmBossRoundResults=[];
+  dmBossRoundResults[dmBossRound]=roundWon;
+  saveDM();dmPhase='round-reveal';render();window.scrollTo(0,0);
+}
+function nextBossRound(){dmBossRound++;dmAnswers={};dmPhase='round';render();window.scrollTo(0,0);}
+function finishBoss(won){
+  if(won){dmParty.forEach(p=>{p.xp+=25;const b=dmCur.boss;if(!p.cq.includes(b.id))p.cq.push(b.id);});saveDM();}
+  dmPhase='boss-discussion';render();window.scrollTo(0,0);
+}
+function endBoss(){
+  const won=dmBossWins>=2;
+  if(won&&dmCur.idx===dmProgress){dmProgress++;saveDM();}
+  dmCur=null;dmBossRound=0;dmBossWins=0;dmBossRoundResults=[];screen='dm-map';render();window.scrollTo(0,0);
+}
+
+function showOL(pl,lv){const o=document.getElementById('overlay');document.getElementById('overlayContent').innerHTML=`<div style="font-size:48px;margin-bottom:8px">⚔️⬆️⚔️</div><div style="font-family:'Cinzel',serif;font-size:26px;color:var(--gold);font-weight:700;margin-bottom:6px">LEVEL UP</div><div style="font-size:18px">${pl.e} ${esc(pl.n)}<br><strong style="color:var(--gold)">Level ${lv} ${LVL_N[lv]}</strong></div>`;o.classList.remove('hidden');setTimeout(()=>o.classList.add('hidden'),3500);}
+function resetDM(){if(!confirm('Reset all campaign data?'))return;localStorage.removeItem(DK);dmParty=[];dmProgress=0;selClass=null;screen='dm-setup';render();}
+
+// ===== PLAYER MODE =====
+function rPCreate(){
+  return`<div class="center" style="padding-top:24px;margin-bottom:20px"><div style="font-size:44px;margin-bottom:4px">⚔️🌑</div><h1 class="title" style="font-size:24px">Create Your Agent</h1></div><div class="card"><label>Name</label><input type="text" id="pn" placeholder="Your name..." maxlength="20"><label class="mt-16">Class</label><div class="class-grid">${CL.map((c,i)=>`<div class="class-card ${selClass===i?'sel':''}" onclick="selClass=${i};render()" style="${selClass===i?`border-color:${c.color};background:${c.color}18`:''}"><div class="emoji">${c.emoji}</div><div class="cname" style="color:${c.color}">${c.name}</div><div class="cdesc">${c.desc}</div></div>`).join('')}</div><button class="btn mt-20" onclick="createP()">Enter ⚔️</button></div><div class="center mt-8"><button class="btn-outline" style="font-size:10px;padding:4px 10px" onclick="screen='mode-select';mode=null;render()">← Back</button></div>`;
+}
+function createP(){const name=document.getElementById('pn')?.value?.trim();if(!name||selClass===null)return;const c=CL[selClass];pData={n:name,cl:c.name,e:c.emoji,c:c.color,xp:0,cq:[],sp:{},prog:0};saveP();screen='p-hub';render();}
+
+function rPHub(){
+  const p=pData,lv=getLv(p.xp),done=new Set(p.cq),us=[...new Set(QUESTS.map(q=>q.skill))];
+  const prog=p.prog||0;
+  let h=`<div class="card"><div class="flex gap-12"><div style="width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:linear-gradient(135deg,${p.c}22,${p.c}08);border:2px solid ${p.c}44">${p.e}</div><div class="grow"><div style="font-size:16px;font-weight:800">${esc(p.n)}</div><div style="color:${p.c};font-size:11px;font-weight:700">Lv.${lv} ${LVL_N[lv]} · ${p.cl}</div><div class="xp-track mt-8" style="height:9px"><div class="xp-fill" style="width:${xpPct(p.xp)}%;background:${p.c}"></div></div><div style="font-size:10px;color:var(--dim);margin-top:3px">${p.xp} XP · ${nxtXP(p.xp)?'Next: '+nxtXP(p.xp):'MAX'}</div></div></div></div>`;
+
+  // Campaign progress
+  h+=`<div class="card"><h2 class="section">🗺️ Campaign Progress — Node ${prog+1} of ${MAP.length}</h2><div class="xp-track mb-12" style="height:10px"><div class="xp-fill" style="width:${(prog/MAP.length)*100}%;background:var(--gold)"></div></div>`;
+
+  // Show current quest/boss
+  if(prog<MAP.length){
+    const cur=nodeContent(prog);
+    if(cur){
+      const isBoss=cur.kind==='boss';
+      h+=`<div style="text-align:center;padding:10px"><div style="font-size:${isBoss?'32':'24'}px;margin-bottom:6px">${isBoss?cur.data.emoji:'⚔️'}</div><div style="font-size:16px;font-weight:700;color:${isBoss?'var(--red)':'var(--gold)'}">${isBoss?'BOSS: '+cur.data.name:'Next: '+cur.data.title}</div>`;
+      if(!isBoss){
+        const q=cur.data;h+=`<div class="badge mt-8">${q.skill}</div><p style="font-size:12px;color:var(--dim);margin:10px 0">${q.story.substring(0,100)}...</p><button class="btn btn-sm btn-orange mt-8" style="width:auto;padding:10px 24px" onclick="startPQ(${prog})">Begin Quest →</button>`;
+      }else{
+        h+=`<p style="font-size:12px;color:var(--dim);margin:8px 0">${cur.data.desc}</p><p style="font-size:11px;color:var(--orange)">Boss battles are led by the Shadow Master on the main screen.</p>`;
+      }
+      h+=`</div>`;
+    }
+  }else{
+    h+=`<div class="center" style="padding:20px"><div style="font-size:40px">👑🎉👑</div><h3 class="quest-title" style="color:var(--green)">CAMPAIGN COMPLETE!</h3></div>`;
+  }
+  h+=`</div>`;
+
+  // All quests list for review
+  h+=`<div class="card"><h2 class="section">📜 All Quests</h2>${QUESTS.map((q,i)=>{const d=done.has(q.id);return`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:${d?'var(--green)':'var(--dim)'}">${d?'✅':'🔒'}</span> ${q.title} <span style="color:var(--dim);font-size:10px">· ${q.skill}</span></div>`;}).join('')}</div>`;
+  h+=`<div class="center mt-8"><button class="reset-btn" onclick="resetP()">🗑️ Reset</button> <button class="btn-outline" style="font-size:10px;padding:4px 10px;margin-left:6px" onclick="screen='mode-select';mode=null;render()">←</button></div>`;
+  return h;
+}
+
+function startPQ(idx){const c=nodeContent(idx);if(!c||c.kind!=='quest')return;pQuest={idx,data:c.data};pChoice=null;pFB=false;screen='p-quest';render();window.scrollTo(0,0);}
+function rPQuest(){
+  const q=pQuest.data;const tb=q.type==='coop'?'<span class="badge-coop" style="margin-left:6px">🤝</span>':q.type==='gray'?'<span class="badge-gray" style="margin-left:6px">⚖️</span>':'';
+  let h=`<button class="btn-outline mb-12" onclick="screen='p-hub';render()">← Back</button><div class="card"><div class="badge mb-8">${q.skill}</div>${tb}<h3 class="quest-title" style="margin-top:6px">${q.title}</h3><p style="font-size:13px;line-height:1.7;color:#b8a890">${q.story}</p></div><div class="card"><h2 class="section" style="color:var(--orange)">🎭 The Situation</h2><p style="font-size:13px;line-height:1.7;font-style:italic">${q.scenario}</p></div>`;
+  h+=`<div class="card"><h2 class="section">What's your move?</h2>${q.choices.map((c,i)=>{let cls='choice-btn',ex='';if(pFB){if(pChoice===i){cls+=c.rating==='best'?' best':c.rating==='partial'?' partial':' wrong';ex=c.rating==='best'?' ✅':c.rating==='partial'?' 🔶':' ❌';}else if(c.rating==='best')cls+=' show-best';else if(c.rating==='partial'&&pChoice!==i)cls+=' show-partial';}return`<button class="${cls}" onclick="pSubmit(${i})" ${pFB?'disabled':''}><span class="letter">${'ABC'[i]}.</span>${esc(c.text)}${ex}</button>`;}).join('')}</div>`;
+  if(pFB){const ch=q.choices[pChoice];const col=ch.rating==='best'?'var(--green)':ch.rating==='partial'?'var(--yellow)':'var(--red)';const ti=ch.rating==='best'?'✅ Best Move':ch.rating==='partial'?'🔶 Solid, But...':'❌ Misstep';h+=`<div class="card feedback" style="border-color:${col}44"><div style="font-size:15px;font-weight:800;color:${col}">${ti}</div><p style="font-size:12px;line-height:1.6;color:#b8a890;margin-top:6px">${ch.feedback}</p>${ch.xp>0?`<div style="margin-top:8px;padding:6px 10px;background:rgba(212,175,55,.08);border-radius:8px;font-size:12px;color:var(--gold);font-weight:700">+${ch.xp} XP</div>`:''}${q.grayNote&&ch.rating!=='wrong'?`<div class="gray-note mt-8"><strong style="color:var(--purple)">⚖️</strong> ${q.grayNote}</div>`:''}<button class="btn mt-12" onclick="screen='p-hub';render();window.scrollTo(0,0)">Continue →</button></div>`;}
+  return h;
+}
+function pSubmit(i){if(pFB)return;pChoice=i;pFB=true;const c=pQuest.data.choices[i];const ol=getLv(pData.xp);pData.xp+=c.xp;if(!pData.cq.includes(pQuest.data.id))pData.cq.push(pQuest.data.id);if(c.rating!=='wrong')pData.sp[pQuest.data.skill]=(pData.sp[pQuest.data.skill]||0)+1;if(pQuest.idx===pData.prog)pData.prog++;saveP();if(getLv(pData.xp)>ol)setTimeout(()=>showOL(pData,getLv(pData.xp)),1200);render();setTimeout(()=>{const f=document.querySelector('.feedback');if(f)f.scrollIntoView({behavior:'smooth',block:'center'});},100);}
+function resetP(){if(!confirm('Reset everything?'))return;localStorage.removeItem(PK);pData=null;selClass=null;screen='p-create';render();}
+
+// Shuffle choices so correct answers aren't always in the same position
+function shuffleArr(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function shuffleAllChoices(){QUESTS.forEach(q=>{shuffleArr(q.choices);});BOSSES.forEach(b=>{b.rounds.forEach(r=>{shuffleArr(r.choices);});});}
+document.addEventListener('DOMContentLoaded',()=>{shuffleAllChoices();stars();render();});
+</script>
+</body>
+</html>
