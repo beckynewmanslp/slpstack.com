@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <!-- ICON: Stacked hexagon layers -->
+  <!-- Top hex: navy -->
+  <polygon points="24,2 36,9 36,23 24,30 12,23 12,9" fill="#1B2E4B"/>
+  <!-- SLP text in top hex -->
+  <text x="24" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="9" fill="white">SLP</text>
+  <!-- Middle layer: blue chevron -->
+  <polygon points="12,25 24,32 36,25 36,30 24,37 12,30" fill="#2E5FA3"/>
+  <!-- Bottom layer: teal chevron -->
+  <polygon points="12,33 24,40 36,33 36,38 24,45 12,38" fill="#6BB8B8"/>
+
+  <!-- WORDMARK -->
+  <!-- SLP in navy -->
+  <text x="48" y="32" font-family="Inter,sans-serif" font-weight="600" font-size="22" fill="#1B2E4B">SLP</text>
+  <!-- Stack in teal -->
+  <text x="97" y="32" font-family="Inter,sans-serif" font-weight="600" font-size="22" fill="#6BB8B8">Stack</text>
+</svg>
